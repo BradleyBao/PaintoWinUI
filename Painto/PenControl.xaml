@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Painto.PenControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Painto"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:localcp="using:Painto.Modules"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <DataTemplate x:Key="PenToolTemplate" x:DataType="localcp:PenData">
+            <ItemContainer HorizontalAlignment="Center" Width="Auto" AutomationProperties.Name="{x:Bind penType}">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind Icon}" Foreground="{x:Bind PenColor}"/>
+            </ItemContainer>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <GridView  x:Name="PenItemList" ScrollViewer.VerticalScrollBarVisibility="Hidden" CanDragItems="True" CanReorderItems="True" Padding="0 3 0 0" Margin="0" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Center" Background="{ThemeResource ControlStrokeColorOnAccentDefault}"
+    ItemTemplate="{StaticResource PenToolTemplate}" ItemsSource="{x:Bind ItemsSource}">
+        <GridView.ItemContainerStyle>
+            <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">
+                <Setter Property="Margin" Value="0, 0, 0, 0"/>
+            </Style>
+        </GridView.ItemContainerStyle>
+
+    </GridView>
+
+
+</UserControl>

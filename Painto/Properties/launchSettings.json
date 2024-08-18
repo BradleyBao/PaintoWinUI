@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Painto (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Painto (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
