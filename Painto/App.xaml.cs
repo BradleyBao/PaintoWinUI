@@ -45,6 +45,6 @@ namespace Painto
             m_window.Activate();
         }
 
-        private Window m_window;
+        public static WinUIEx.WindowEx m_window;
     }
 }

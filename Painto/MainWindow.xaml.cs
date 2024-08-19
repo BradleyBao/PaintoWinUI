@@ -25,6 +25,7 @@ using Windows.UI.ViewManagement;
 using Windows.UI.WindowManagement;
 using System.Collections.ObjectModel;
 using Painto.Modules;
+using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -34,17 +35,10 @@ namespace Painto
     /// <summary>
     /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow : WinUIEx.WindowEx
     {
-
-        private Polyline _currentLine;
-        private bool _isDrawingMode = false;
-        private bool _isEraserMode = false;
-        private bool _computerMode = false;
-        private const double EraserRadius = 15;
-
         // Child Window - Toolbar 
-        private Window _toolbarWindow;
+        private ToolBarWindow _toolbarWindow;
 
         // Transparent + Click Through 
         private const int WS_EX_TRANSPARENT = 0x00000020;
@@ -89,11 +83,42 @@ namespace Painto
             RemoveTitleBarAndBorder(hwnd);
             RemoveWindowShadow(hwnd);
 
-            EnterFullScreenMode();
+            //EnterFullScreenMode();
 
-            InitPens();
+            Init();
 
             // Create Toolbar 
+        }
+
+        private void Init()
+        {
+            InitWindow();
+            SourceInitialized();
+            InitPens();
+        }
+
+        private void InitWindow()
+        {
+            _toolbarWindow = new ToolBarWindow();
+            IntPtr mainHwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            IntPtr toolbarHwnd = WinRT.Interop.WindowNative.GetWindowHandle(_toolbarWindow);
+
+
+            // 将 ToolBarWindow 设置为 MainWindow 的子窗体
+            //SetOwner(toolbarHwnd, mainHwnd);
+            _toolbarWindow.Activate();
+            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+            int screenHeight = displayArea.WorkArea.Height;
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight - 30, 300, 75));
+        }
+
+        private void SourceInitialized()
+        {
+            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            IntPtr toolbarHwnd = WinRT.Interop.WindowNative.GetWindowHandle(_toolbarWindow);
+            SetWindowLong(hwnd, WindowLongFlags.GWL_HWNDPARENT, toolbarHwnd);
         }
 
         private Microsoft.UI.Windowing.AppWindow GetAppWindowForCurrentWindow()
@@ -109,6 +134,20 @@ namespace Painto
         {
             var m_appWindow = GetAppWindowForCurrentWindow();
             m_appWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
+        }
+
+        //[DllImport("user32.dll", SetLastError = false)]
+        //private static extern IntPtr SetParent(IntPtr child, IntPtr parent);
+
+
+        // Set Ownership
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr SetWindowLong(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
+
+        private enum WindowLongFlags
+        {
+            GWL_HWNDPARENT = -8
         }
 
         internal void InitPens()
@@ -137,117 +176,16 @@ namespace Painto
             DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, ref value, sizeof(int));
         }
 
+        // Win32 API 常量
+        private const int SWP_NOMOVE = 0x0002;
+        private const int SWP_NOSIZE = 0x0001;
+        private const int SWP_NOACTIVATE = 0x0010;
+        private const int SWP_NOREDRAW = 0x0080;
 
-        // Draw 
+        private static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
 
-        private void DrawingCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-            var point = e.GetCurrentPoint(DrawingCanvas).Position;
-
-            // 在计算机模式下不进行任何绘画或擦除操作
-            if (_computerMode)
-                return;
-
-            // 在非橡皮擦模式下按下左键开始绘画
-            if (!_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-                _currentLine = new Polyline
-                {
-                    Stroke = new SolidColorBrush(Colors.Black),
-                    StrokeThickness = 2
-                };
-                DrawingCanvas.Children.Add(_currentLine);
-                _isDrawingMode = true;
-                _currentLine.Points.Add(point);
-            }
-            // 在橡皮擦模式下按下左键开始擦除
-            else if (_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-                RemoveIntersectingLines(point);
-            }
-        }
-
-        private void DrawingCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-            var point = e.GetCurrentPoint(DrawingCanvas).Position;
-
-            // 在计算机模式下不进行任何绘画或擦除操作
-            if (_computerMode)
-                return;
-
-            // 绘画模式下按下左键绘制线条
-            if (_isDrawingMode && !_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-                _currentLine.Points.Add(point);
-            }
-
-            // 橡皮擦模式下按住左键移动时进行擦除
-            if (_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-
-                // 移除与橡皮擦重叠的线条部分
-                RemoveIntersectingLines(point);
-            }
-        }
-
-        private void DrawingCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-            if (!_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-                _isDrawingMode = false;
-            }
-        }
-
-        private void RemoveIntersectingLines(Point position)
-        {
-            var linesToRemove = new List<Polyline>();
-            foreach (var child in DrawingCanvas.Children.OfType<Polyline>())
-            {
-                if (IsLineIntersectingWithEraser(child, position))
-                {
-                    linesToRemove.Add(child);
-                }
-            }
-
-            foreach (var line in linesToRemove)
-            {
-                DrawingCanvas.Children.Remove(line);
-            }
-        }
-
-        private bool IsLineIntersectingWithEraser(Polyline line, Point eraserPosition)
-        {
-            foreach (var point in line.Points)
-            {
-                if (IsPointInEraserArea(point, eraserPosition))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private bool IsPointInEraserArea(Point point, Point eraserPosition)
-        {
-            var distance = Math.Sqrt(Math.Pow(point.X - eraserPosition.X, 2) + Math.Pow(point.Y - eraserPosition.Y, 2));
-            return distance < EraserRadius;
-        }
-
-        internal void UnlockScreen()
-        {
-            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WinUIEx.HwndExtensions.SetAlwaysOnTop(hwnd, true);
-            int extendedStyle = GetWindowLong(hwnd, GWL_STYLE);
-            _ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
-        }
-
-        internal void LockScreen()
-        {
-            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WinUIEx.HwndExtensions.SetAlwaysOnTop(hwnd, true);
-            int extendedStyle = GetWindowLong(hwnd, GWL_STYLE);
-            _ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | ~WS_EX_TRANSPARENT);
-        }
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         private void RootTool_SelectItem(object sender, ItemClickEventArgs e)
         {
@@ -260,36 +198,36 @@ namespace Painto
                 switch (clickedItem.Tag)
                 {
                     case "Eraser":
-                        _isEraserMode = true;
-                        if (_computerMode)
+                        ToolBarWindow._isEraserMode = true;
+                        if (ToolBarWindow._computerMode)
                         {
-                            LockScreen();
-                            _computerMode = false;
+                            ToolBarWindow.LockScreen();
+                            ToolBarWindow._computerMode = false;
                         }
                         break;
 
                     case "DrawMode":
-                        _isEraserMode = false;
-                        if (_computerMode)
+                        ToolBarWindow._isEraserMode = false;
+                        if (ToolBarWindow._computerMode)
                         {
-                            LockScreen();
-                            _computerMode = false;
+                            ToolBarWindow.LockScreen();
+                            ToolBarWindow._computerMode = false;
                         }
                         
                         break;
 
                     case "ComputerMode":
-                        if (!_computerMode)
+                        if (!ToolBarWindow._computerMode)
                         {
-                            _computerMode = true;
-                            UnlockScreen();
+                            ToolBarWindow._computerMode = true;
+                            ToolBarWindow.UnlockScreen();
                         }
                         
                         break;
 
                     default:
-                        _isEraserMode = false;
-                        _computerMode = false;
+                        ToolBarWindow._isEraserMode = false;
+                        ToolBarWindow._computerMode = false;
                         break;
                 }
                 
