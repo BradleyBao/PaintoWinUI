@@ -36,6 +36,10 @@ namespace Painto
         public static bool _isEraserMode = false;
         public static bool _computerMode = false;
         private const double EraserRadius = 15;
+
+        // Pen Attribution 
+        public static Windows.UI.Color penColor = Colors.Black;
+        public static int penThickness = 2;
         
 
         // Transparent + Click Through 
@@ -120,6 +124,31 @@ namespace Painto
         // Draw
         // Draw 
 
+        public Windows.UI.Color ConvertHexToColor(string hex)
+        {
+            // 去掉开头的 '#' 字符
+            hex = hex.Replace("#", string.Empty);
+
+            byte a = 255; // 默认为不透明
+            byte r, g, b;
+
+            if (hex.Length == 8) // 如果长度为8，表示ARGB
+            {
+                a = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+                r = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+                g = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+                b = byte.Parse(hex.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+            }
+            else // 默认为RGB
+            {
+                r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+                g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+                b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+            }
+
+            return Windows.UI.Color.FromArgb(a, r, g, b);
+        }
+
         private void DrawingCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
             var point = e.GetCurrentPoint(DrawingCanvas).Position;
@@ -133,8 +162,8 @@ namespace Painto
             {
                 _currentLine = new Polyline
                 {
-                    Stroke = new SolidColorBrush(Colors.Black),
-                    StrokeThickness = 2
+                    Stroke = new SolidColorBrush(penColor),
+                    StrokeThickness = penThickness
                 };
                 DrawingCanvas.Children.Add(_currentLine);
                 _isDrawingMode = true;

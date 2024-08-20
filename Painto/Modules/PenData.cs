@@ -10,9 +10,10 @@ namespace Painto.Modules
 {
     public class PenData
     {
-        public string PenColor { get; set; }
+        public Windows.UI.Color PenColor { get; set; }
         public int Thickness { get; set; }
         public string penType { get; set; }
         public string Icon { get; set; }
+        public string PenColorString;
     }
 }

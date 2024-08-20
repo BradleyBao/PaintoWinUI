@@ -12,12 +12,16 @@
     <UserControl.Resources>
         <DataTemplate x:Key="PenToolTemplate" x:DataType="localcp:PenData">
             <ItemContainer HorizontalAlignment="Center" Width="Auto" AutomationProperties.Name="{x:Bind penType}">
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind Icon}" Foreground="{x:Bind PenColor}"/>
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind Icon}" Foreground="{x:Bind PenColorString}"/>
             </ItemContainer>
         </DataTemplate>
     </UserControl.Resources>
 
-    <GridView  x:Name="PenItemList" ScrollViewer.VerticalScrollBarVisibility="Hidden" CanDragItems="True" CanReorderItems="True" Padding="0 3 0 0" Margin="0" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Center" Background="{ThemeResource ControlStrokeColorOnAccentDefault}"
+    <GridView x:Name="PenItemList" IsItemClickEnabled="True" ItemClick="PenItemList_ItemClick"
+              ScrollViewer.VerticalScrollBarVisibility="Hidden" CanDragItems="True" CanReorderItems="True"
+              DoubleTapped="PenItemList_DoubleTapped" IsDoubleTapEnabled="True"
+              Padding="0 3 0 0" Margin="0" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Center" 
+              Background="{ThemeResource ControlStrokeColorOnAccentDefault}"
     ItemTemplate="{StaticResource PenToolTemplate}" ItemsSource="{x:Bind ItemsSource}">
         <GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">

@@ -26,6 +26,8 @@ using Windows.UI.WindowManagement;
 using System.Collections.ObjectModel;
 using Painto.Modules;
 using Windows.System;
+using Windows.Storage;
+using Newtonsoft.Json; 
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -92,9 +94,16 @@ namespace Painto
 
         private void Init()
         {
+            MajorFunctionControl.SelectedIndex = 1;
+            var selectedItem = (GridViewItem)MajorFunctionControl.ContainerFromIndex(1);
+            selectedItem?.Focus(FocusState.Programmatic);
+
+            penControl.DisableWindowControl += DisableToolBarControl;
+
             InitWindow();
             SourceInitialized();
             InitPens();
+            AdaptWindowLocation();
         }
 
         private void InitWindow()
@@ -107,11 +116,42 @@ namespace Painto
             // 将 ToolBarWindow 设置为 MainWindow 的子窗体
             //SetOwner(toolbarHwnd, mainHwnd);
             _toolbarWindow.Activate();
+        }
+
+        private void DisableToolBarControl(object sender, EventArgs e)
+        {
+            // 强制切换至电脑模式
+            MajorFunctionControl.SelectedIndex = 0;
+            var selectedItem = (GridViewItem)MajorFunctionControl.ContainerFromIndex(0);
+            selectedItem?.Focus(FocusState.Programmatic);
+            ToolBarWindow._computerMode = true;
+            ToolBarWindow.UnlockScreen();
+            
+        }
+
+        private void RequestRestoreWindow(object sender, EventArgs e)
+        {
+            AdaptWindowLocation();
+        }
+
+        public void AdaptWindowLocation()
+        {
+            
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
             int screenHeight = displayArea.WorkArea.Height;
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight - 30, 300, 75));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, 300 + PenItems.Count * 15, 75));
+        }
+
+        public void AdaptWindowLocation(int height)
+        {
+
+            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+            int screenHeight = displayArea.WorkArea.Height;
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - height, 300 + PenItems.Count * 15, height));
         }
 
         private void SourceInitialized()
@@ -152,12 +192,53 @@ namespace Painto
 
         internal void InitPens()
         {
-            PenItems = new ObservableCollection<PenData>
+            PenItems = LoadPenItems();
+
+            // If not empty 
+            if (PenItems.Count <= 0)
             {
-                new PenData { PenColor = Colors.Black.ToString(), Thickness = 5, penType = "Normal", Icon = "\uEE56"},
-                new PenData { PenColor = Colors.Yellow.ToString(), Thickness = 5, penType = "Normal", Icon = "\uEE56" }
-            };
+                // Default Value
+                PenItems = new ObservableCollection<PenData>
+                {
+                    new PenData { PenColor = Colors.Black, Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Colors.Black.ToString()},
+                    new PenData { PenColor = Color.FromArgb(30,144,255,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(30,144,255,255).ToString()},
+                    new PenData { PenColor = Color.FromArgb(253,230,224,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(253,230,224,255).ToString()}
+                };
+            }
+
             penControl.ItemsSource = PenItems;
+            SavePenItems(PenItems);
+        }
+
+        public void SavePenItems(ObservableCollection<PenData> penItems)
+        {
+            // 序列化 ObservableCollection<PenData> 对象为 JSON 字符串
+            string penItemsJson = JsonConvert.SerializeObject(penItems);
+
+            // 获取应用程序的本地设置容器
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
+            // 存储 JSON 字符串到设置属性中
+            localSettings.Values["PenItems"] = penItemsJson;
+        }
+
+        public ObservableCollection<PenData> LoadPenItems()
+        {
+            // 获取应用程序的本地设置容器
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
+            // 从设置属性中获取 JSON 字符串
+            string penItemsJson = localSettings.Values["PenItems"] as string;
+
+            // 如果 JSON 字符串存在，则反序列化为 ObservableCollection<PenData> 对象
+            if (!string.IsNullOrEmpty(penItemsJson))
+            {
+                var penItems = JsonConvert.DeserializeObject<ObservableCollection<PenData>>(penItemsJson);
+                return penItems;
+            }
+
+            // 如果没有存储的 PenItems 数据，则返回一个空的集合或 null
+            return new ObservableCollection<PenData>();
         }
 
         private void RemoveTitleBarAndBorder(IntPtr hwnd)
@@ -231,6 +312,21 @@ namespace Painto
                         break;
                 }
                 
+            }
+        }
+
+        private void SubFunctionControl_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is FontIcon clickedItem)
+            {
+                switch (clickedItem.Tag)
+                {
+                    case "AddPen":
+                        break;
+
+                    default:
+                        break;
+                }
             }
         }
     }

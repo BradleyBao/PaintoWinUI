@@ -26,13 +26,13 @@
         
         <StackPanel x:Name="ControlPanel" CornerRadius="5" Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Height="50" Background="{ThemeResource CardStrokeColorDefaultSolid}" HorizontalAlignment="Center" VerticalAlignment="Bottom">
             <!--<Image Source="/Assets/sources/pen.svg" Height="100" />-->
-            <GridView ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="2 0 0 0" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="RootTool_SelectItem">
+            <GridView x:Name="MajorFunctionControl" ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="2 0 0 0" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="RootTool_SelectItem">
                 <GridView.Items>
                     <GridViewItem>
                         <FontIcon Glyph="&#xE8B0;" Tag="ComputerMode" />
                     </GridViewItem>
                     <GridViewItem>
-                        <FontIcon Glyph="&#xE70F;" Foreground="#C72335" Tag="DrawMode" />
+                        <FontIcon Glyph="&#xE70F;" Tag="DrawMode" />
                     </GridViewItem>
                     <GridViewItem>
                         <FontIcon Glyph="&#xE75C;" Tag="Eraser" />
@@ -48,10 +48,10 @@
             
             <local:PenControl x:Name="penControl"/>
 
-            <GridView ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="0 0 2 0" ScrollViewer.VerticalScrollMode="Disabled" SelectionMode="None" IsItemClickEnabled="True" Background="{ThemeResource ControlStrokeColorOnAccentDefault}">
+            <GridView x:Name="SubFunctionControl" ItemClick="SubFunctionControl_ItemClick" ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="0 0 2 0" ScrollViewer.VerticalScrollMode="Disabled" SelectionMode="None" IsItemClickEnabled="True" Background="{ThemeResource ControlStrokeColorOnAccentDefault}">
 
-                <FontIcon Glyph="&#xE710;" />
-                <FontIcon Glyph="&#xED62;" />
+                <FontIcon Glyph="&#xE710;" Tag="AddPen" />
+                <FontIcon Glyph="&#xED62;" Foreground="#C72335" Tag="EraseAll" />
 
                 <GridView.ItemContainerStyle>
                     <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">
