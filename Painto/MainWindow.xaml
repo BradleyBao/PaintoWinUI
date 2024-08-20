@@ -24,7 +24,7 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>-->
         
-        <StackPanel x:Name="ControlPanel" CornerRadius="5" Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Height="50" Background="{ThemeResource CardStrokeColorDefaultSolid}" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+        <StackPanel x:Name="ControlPanel" ScrollViewer.HorizontalScrollBarVisibility="Auto" CornerRadius="5" Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Height="50" Background="{ThemeResource CardStrokeColorDefaultSolid}" HorizontalAlignment="Center" VerticalAlignment="Bottom">
             <!--<Image Source="/Assets/sources/pen.svg" Height="100" />-->
             <GridView x:Name="MajorFunctionControl" ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="2 0 0 0" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="RootTool_SelectItem">
                 <GridView.Items>

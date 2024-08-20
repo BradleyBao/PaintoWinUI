@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="a1aa7a28-3c28-4286-af59-0f294a3850ed"
-    Publisher="CN=tiany"
+    Name="TianYi.Painto"
+    Publisher="CN=98419A6D-1B04-4EA1-8658-1B5D9D2D15EA"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="a1aa7a28-3c28-4286-af59-0f294a3850ed" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="f78ca8ef-1e19-4dfd-93f6-de614cc0cb6b" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Painto</DisplayName>
-    <PublisherDisplayName>tiany</PublisherDisplayName>
+    <PublisherDisplayName>Tian Yi</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -35,11 +35,11 @@
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="Painto"
-        Description="Painto"
+        Description="An On-Screen Drawing Software"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>

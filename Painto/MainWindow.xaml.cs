@@ -101,11 +101,12 @@ namespace Painto
 
             penControl.DisableWindowControl += DisableToolBarControl;
             penControl.SaveData += PenControl_SaveData;
+            ControlPanel.LayoutUpdated += ControlPanel_LayoutUpdated;
 
             InitWindow();
             SourceInitialized();
             InitPens();
-            AdaptWindowLocation();
+            //AdaptWindowLocation();
         }
 
         private void PenControl_SaveData(object sender, EventArgs e)
@@ -141,6 +142,14 @@ namespace Painto
             AdaptWindowLocation();
         }
 
+        private void ControlPanel_LayoutUpdated(object sender, object e)
+        {
+            if (ControlPanel.ActualWidth > 0)
+            {
+                AdaptWindowLocation();
+            }
+        }
+
         public void AdaptWindowLocation()
         {
             
@@ -148,7 +157,7 @@ namespace Painto
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
             int screenHeight = displayArea.WorkArea.Height;
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, 360 + PenItems.Count * 15, 75));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, (int)ControlPanel.ActualWidth, 75));
         }
 
         public void AdaptWindowLocation(int height)
@@ -165,6 +174,8 @@ namespace Painto
         {
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             IntPtr toolbarHwnd = WinRT.Interop.WindowNative.GetWindowHandle(_toolbarWindow);
+
+            // Set Ownership
             SetWindowLong(hwnd, WindowLongFlags.GWL_HWNDPARENT, toolbarHwnd);
         }
 
