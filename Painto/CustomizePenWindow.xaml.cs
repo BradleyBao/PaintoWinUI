@@ -16,6 +16,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
+using Painto.Modules;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -31,6 +32,9 @@ namespace Painto
         // Property
         private int thickness;
         private Color color;
+        public PenData penData;
+        public delegate void MyEventHandler(object sender, EventArgs e);
+        public event MyEventHandler UpdatePenLayout;
 
         private const int WS_EX_TRANSPARENT = 0x00000020;
         private const int GWL_EXSTYLE = -20;
@@ -56,10 +60,11 @@ namespace Painto
         [DllImport("dwmapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
-        public CustomizePenWindow(int thickness, Color color)
+        public CustomizePenWindow(int thickness, Color color, PenData penData)
         {
             this.thickness = thickness;
             this.color = color;
+            this.penData = penData; 
             this.InitializeComponent();
             Init();
         }
@@ -69,6 +74,8 @@ namespace Painto
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinUIEx.HwndExtensions.SetAlwaysOnTop(hwnd, true);
             RemoveTitleBarAndBorder(hwnd);
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOOLWINDOW & ~WS_EX_APPWINDOW);
 
             //RemoveWindowShadow(hwnd);
             AdaptWindowLocation();
@@ -82,6 +89,9 @@ namespace Painto
             ThicknessAdjuster.Value = thickness;
             ColorPickerforPen.Color = color;
         }
+
+        private const int WS_EX_APPWINDOW = 0x00040000;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
 
         public void AdaptWindowLocation()
         {
@@ -111,12 +121,18 @@ namespace Painto
 
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-
+            int thickness = (int)ThicknessAdjuster.Value;
+            Color newColor = ColorPickerforPen.Color;
+            penData.PenColor = newColor;
+            penData.Thickness = thickness;
+            penData.PenColorString = newColor.ToString();
+            UpdatePenLayout?.Invoke(this, EventArgs.Empty);
+            this.AppWindow.Destroy();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-
+            this.AppWindow.Destroy();
         }
     }
 }

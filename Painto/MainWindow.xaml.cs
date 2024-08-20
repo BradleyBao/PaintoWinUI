@@ -27,7 +27,8 @@ using System.Collections.ObjectModel;
 using Painto.Modules;
 using Windows.System;
 using Windows.Storage;
-using Newtonsoft.Json; 
+using Newtonsoft.Json;
+using Windows.ApplicationModel.Core;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -99,11 +100,17 @@ namespace Painto
             selectedItem?.Focus(FocusState.Programmatic);
 
             penControl.DisableWindowControl += DisableToolBarControl;
+            penControl.SaveData += PenControl_SaveData;
 
             InitWindow();
             SourceInitialized();
             InitPens();
             AdaptWindowLocation();
+        }
+
+        private void PenControl_SaveData(object sender, EventArgs e)
+        {
+            SavePenItems(penControl.ItemsSource);
         }
 
         private void InitWindow()
@@ -141,7 +148,7 @@ namespace Painto
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
             int screenHeight = displayArea.WorkArea.Height;
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, 300 + PenItems.Count * 15, 75));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, 360 + PenItems.Count * 15, 75));
         }
 
         public void AdaptWindowLocation(int height)
@@ -314,6 +321,7 @@ namespace Painto
                 
             }
         }
+        private delegate void CloseAppDelegate();
 
         private void SubFunctionControl_ItemClick(object sender, ItemClickEventArgs e)
         {
@@ -322,6 +330,10 @@ namespace Painto
                 switch (clickedItem.Tag)
                 {
                     case "AddPen":
+                        break;
+
+                    case "CloseApp":
+                        App.Current.Exit();
                         break;
 
                     default:

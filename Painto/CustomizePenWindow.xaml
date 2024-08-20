@@ -37,7 +37,7 @@
 
             <StackPanel Orientation="Horizontal">
                 <Button Margin="0 0 8 0" x:Name="ApplyButton" Content="Apply" Style="{ThemeResource AccentButtonStyle}" Click="ApplyButton_Click"></Button>
-                <Button x:Name="CancelButton" Content="Apply" Style="{ThemeResource DefaultButtonStyle}" Click="CancelButton_Click"></Button>
+                <Button x:Name="CancelButton" Content="Cancel" Style="{ThemeResource DefaultButtonStyle}" Click="CancelButton_Click"></Button>
             </StackPanel>
             
         </StackPanel>

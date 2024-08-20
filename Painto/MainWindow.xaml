@@ -51,7 +51,8 @@
             <GridView x:Name="SubFunctionControl" ItemClick="SubFunctionControl_ItemClick" ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="0 0 2 0" ScrollViewer.VerticalScrollMode="Disabled" SelectionMode="None" IsItemClickEnabled="True" Background="{ThemeResource ControlStrokeColorOnAccentDefault}">
 
                 <FontIcon Glyph="&#xE710;" Tag="AddPen" />
-                <FontIcon Glyph="&#xED62;" Foreground="#C72335" Tag="EraseAll" />
+                <FontIcon Glyph="&#xED62;" Tag="EraseAll" />
+                <FontIcon Glyph="&#xEF2C;" Foreground="#ff461f" Tag="CloseApp" />
 
                 <GridView.ItemContainerStyle>
                     <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">
