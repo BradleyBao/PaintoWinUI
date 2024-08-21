@@ -29,6 +29,7 @@ using Windows.System;
 using Windows.Storage;
 using Newtonsoft.Json;
 using Windows.ApplicationModel.Core;
+using Windows.Graphics.Display; 
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -42,6 +43,8 @@ namespace Painto
     {
         // Child Window - Toolbar 
         private ToolBarWindow _toolbarWindow;
+        private int _currentWindowWidth;
+        private uint dpiWindow;
 
         // Transparent + Click Through 
         private const int WS_EX_TRANSPARENT = 0x00000020;
@@ -77,6 +80,7 @@ namespace Painto
             this.InitializeComponent();
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinUIEx.HwndExtensions.SetAlwaysOnTop(hwnd, true);
+            dpiWindow = GetDpiForWindow(hwnd);
             int extendedStyle = GetWindowLong(hwnd, GWL_STYLE);
 
             // ! IMPORTANT Click Through
@@ -102,12 +106,17 @@ namespace Painto
             penControl.DisableWindowControl += DisableToolBarControl;
             penControl.SaveData += PenControl_SaveData;
             ControlPanel.LayoutUpdated += ControlPanel_LayoutUpdated;
+            
 
             InitWindow();
             SourceInitialized();
             InitPens();
             //AdaptWindowLocation();
         }
+
+        [DllImport("User32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
+
 
         private void PenControl_SaveData(object sender, EventArgs e)
         {
@@ -152,17 +161,18 @@ namespace Painto
 
         public void AdaptWindowLocation()
         {
-            
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
             int screenHeight = displayArea.WorkArea.Height;
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, (int)ControlPanel.ActualWidth, 75));
+
+            // 根据 DPI 更改窗口大小
+            int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, controlPanelWidth, 75));
         }
 
         public void AdaptWindowLocation(int height)
         {
-
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
@@ -344,13 +354,21 @@ namespace Painto
                         break;
 
                     case "CloseApp":
-                        App.Current.Exit();
+                        APPShutDown();
                         break;
 
                     default:
+                        
                         break;
                 }
             }
+        }
+
+        // ShutDown: Close first then shutdown
+        private void APPShutDown()
+        {
+            this.Close();
+            App.Current.Exit();
         }
     }
 }

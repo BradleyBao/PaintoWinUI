@@ -65,5 +65,19 @@ namespace Painto
             PenItemList.ItemsSource = ItemsSource;
             SaveData?.Invoke(this, EventArgs.Empty);
         }
+
+        public void ShutDown()
+        {
+            if (penWindow != null)
+            {
+                lock (this)
+                {
+                    penWindow.Close();
+                    penWindow = null;
+                    
+                }
+                
+            }
+        }
     }
 }

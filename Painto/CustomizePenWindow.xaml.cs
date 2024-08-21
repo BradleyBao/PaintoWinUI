@@ -17,6 +17,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
 using Painto.Modules;
+using Windows.UI.WindowManagement;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -35,6 +36,7 @@ namespace Painto
         public PenData penData;
         public delegate void MyEventHandler(object sender, EventArgs e);
         public event MyEventHandler UpdatePenLayout;
+        private uint dpiWindow;
 
         private const int WS_EX_TRANSPARENT = 0x00000020;
         private const int GWL_EXSTYLE = -20;
@@ -73,6 +75,7 @@ namespace Painto
         {
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinUIEx.HwndExtensions.SetAlwaysOnTop(hwnd, true);
+            dpiWindow = GetDpiForWindow(hwnd);
             RemoveTitleBarAndBorder(hwnd);
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
             SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOOLWINDOW & ~WS_EX_APPWINDOW);
@@ -83,6 +86,9 @@ namespace Painto
             InitUI();
             
         }
+
+        [DllImport("User32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hWnd);
 
         private void InitUI()
         {
@@ -100,7 +106,9 @@ namespace Painto
             var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
             int screenHeight = displayArea.WorkArea.Height;
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight - 770, 380, 770));
+            int width = (int)(380 * dpiWindow / 96.0);
+            int height = (int)(770 * dpiWindow / 96.0);
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight - height, width, height));
         }
 
         private void RemoveTitleBarAndBorder(IntPtr hwnd)
@@ -127,12 +135,12 @@ namespace Painto
             penData.Thickness = thickness;
             penData.PenColorString = newColor.ToString();
             UpdatePenLayout?.Invoke(this, EventArgs.Empty);
-            this.AppWindow.Destroy();
+            this.Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            this.AppWindow.Destroy();
+            this.Close();
         }
     }
 }

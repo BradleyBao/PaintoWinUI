@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -42,7 +43,22 @@ namespace Painto
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
+            // 设置 DPI 感知
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
+            var dpiAwarenessContext = DPI_AWARENESS_CONTEXT.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2;
+            SetThreadDpiAwarenessContext(dpiAwarenessContext);
             m_window.Activate();
+        }
+
+        [DllImport("User32.dll")]
+        static extern DPI_AWARENESS_CONTEXT SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT dpiContext);
+
+        public enum DPI_AWARENESS_CONTEXT
+        {
+            DPI_AWARENESS_CONTEXT_UNAWARE = 16,
+            DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = 17,
+            DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = 18,
+            DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = 34,
         }
 
         public static MainWindow m_window;
