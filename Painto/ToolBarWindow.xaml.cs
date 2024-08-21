@@ -80,7 +80,8 @@ namespace Painto
             _ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
             //_ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
             _ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT);
-
+            this.Title = "PaintoDrawWindow";
+            this.AppWindow.SetIcon("Assets/painto_logo.ico");
             RemoveTitleBarAndBorder(hwnd);
             RemoveWindowShadow(hwnd);
             EnterFullScreenMode();
@@ -153,26 +154,31 @@ namespace Painto
         {
             var point = e.GetCurrentPoint(DrawingCanvas).Position;
 
-            // 在计算机模式下不进行任何绘画或擦除操作
             if (_computerMode)
                 return;
 
-            // 在非橡皮擦模式下按下左键开始绘画
-            if (!_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
+            if (e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
             {
-                _currentLine = new Polyline
+                if (!_isEraserMode)
                 {
-                    Stroke = new SolidColorBrush(penColor),
-                    StrokeThickness = penThickness
-                };
-                DrawingCanvas.Children.Add(_currentLine);
-                _isDrawingMode = true;
-                _currentLine.Points.Add(point);
-            }
-            // 在橡皮擦模式下按下左键开始擦除
-            else if (_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-                RemoveIntersectingLines(point);
+                    _currentLine = new Polyline
+                    {
+                        Stroke = new SolidColorBrush(penColor),
+                        StrokeThickness = penThickness,
+                        StrokeLineJoin = PenLineJoin.Round,
+                        StrokeStartLineCap = PenLineCap.Round,
+                        StrokeEndLineCap = PenLineCap.Round
+                    };
+                    DrawingCanvas.Children.Add(_currentLine);
+                    _isDrawingMode = true;
+                    _currentLine.Points.Add(point);
+                }
+                else
+                {
+                    // 在橡皮擦模式下，开始擦除
+                    _isDrawingMode = true;
+                    RemoveIntersectingLines(point);
+                }
             }
         }
 
@@ -180,33 +186,42 @@ namespace Painto
         {
             var point = e.GetCurrentPoint(DrawingCanvas).Position;
 
-            // 在计算机模式下不进行任何绘画或擦除操作
-            if (_computerMode)
+            if (_computerMode || !_isDrawingMode)
                 return;
 
-            // 绘画模式下按下左键绘制线条
-            if (_isDrawingMode && !_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
+            if (e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
             {
-                _currentLine.Points.Add(point);
-            }
-
-            // 橡皮擦模式下按住左键移动时进行擦除
-            if (_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
-            {
-
-                // 移除与橡皮擦重叠的线条部分
-                RemoveIntersectingLines(point);
+                if (!_isEraserMode)
+                {
+                    // 继续绘图
+                    var lastPoint = _currentLine.Points.LastOrDefault();
+                    if (Distance(lastPoint, point) > 2.0)
+                    {
+                        _currentLine.Points.Add(point);
+                    }
+                }
+                else
+                {
+                    // 继续擦除
+                    RemoveIntersectingLines(point);
+                }
             }
         }
 
         private void DrawingCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
         {
-            if (!_isEraserMode && e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
+            if (e.GetCurrentPoint(DrawingCanvas).Properties.IsLeftButtonPressed)
             {
                 _isDrawingMode = false;
             }
-            
         }
+
+        private double Distance(Point p1, Point p2)
+        {
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+        }
+
+
 
         private void RemoveIntersectingLines(Point position)
         {

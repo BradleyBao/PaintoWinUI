@@ -14,6 +14,7 @@ namespace Painto
         public static CustomizePenWindow penWindow;
         public delegate void MyEventHandler(object sender, EventArgs e);
         public event MyEventHandler DisableWindowControl;
+        public event MyEventHandler SwitchBackDrawControl;
         public event MyEventHandler SaveData;
 
         public ObservableCollection<PenData> ItemsSource
@@ -52,11 +53,22 @@ namespace Painto
         private void PenItemList_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
         {
             var item = (sender as GridView).SelectedItem as PenData;
-            
+            if (penWindow != null)
+            {
+                return;
+            }
             penWindow = new CustomizePenWindow(item.Thickness, item.PenColor, item);
             penWindow.UpdatePenLayout += PenWindow_UpdatePenLayout;
+            penWindow.SwitchBackToDrawingMode += PenWindow_SwitchBackToDrawingMode;
             DisableWindowControl?.Invoke(this, EventArgs.Empty);
             penWindow.Activate(); // Activate the window and ensure it gets focus
+        }
+
+        private void PenWindow_SwitchBackToDrawingMode(object sender, EventArgs e)
+        {
+            SwitchBackDrawControl?.Invoke(this, EventArgs.Empty);
+            penWindow.Close();
+            penWindow = null;
         }
 
         private void PenWindow_UpdatePenLayout(object sender, EventArgs e)

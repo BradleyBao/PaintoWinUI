@@ -86,6 +86,8 @@ namespace Painto
             // ! IMPORTANT Click Through
             //_ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
             //_ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT);
+            this.Title = "Painto";
+            this.AppWindow.SetIcon("Assets/painto_logo.ico");
 
             RemoveTitleBarAndBorder(hwnd);
             RemoveWindowShadow(hwnd);
@@ -105,6 +107,7 @@ namespace Painto
 
             penControl.DisableWindowControl += DisableToolBarControl;
             penControl.SaveData += PenControl_SaveData;
+            penControl.SwitchBackDrawControl += PenControl_SwitchBackDrawControl;
             ControlPanel.LayoutUpdated += ControlPanel_LayoutUpdated;
             
 
@@ -112,6 +115,15 @@ namespace Painto
             SourceInitialized();
             InitPens();
             //AdaptWindowLocation();
+        }
+
+        private void PenControl_SwitchBackDrawControl(object sender, EventArgs e)
+        {
+            MajorFunctionControl.SelectedIndex = 1;
+            var selectedItem = (GridViewItem)MajorFunctionControl.ContainerFromIndex(1);
+            selectedItem?.Focus(FocusState.Programmatic);
+            ToolBarWindow._computerMode = false;
+            ToolBarWindow.LockScreen();
         }
 
         [DllImport("User32.dll")]

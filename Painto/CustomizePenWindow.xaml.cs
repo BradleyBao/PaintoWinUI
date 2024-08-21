@@ -36,6 +36,7 @@ namespace Painto
         public PenData penData;
         public delegate void MyEventHandler(object sender, EventArgs e);
         public event MyEventHandler UpdatePenLayout;
+        public event MyEventHandler SwitchBackToDrawingMode;
         private uint dpiWindow;
 
         private const int WS_EX_TRANSPARENT = 0x00000020;
@@ -135,12 +136,12 @@ namespace Painto
             penData.Thickness = thickness;
             penData.PenColorString = newColor.ToString();
             UpdatePenLayout?.Invoke(this, EventArgs.Empty);
-            this.Close();
+            SwitchBackToDrawingMode?.Invoke(this, EventArgs.Empty);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            SwitchBackToDrawingMode?.Invoke(this, EventArgs.Empty);
         }
     }
 }
