@@ -222,8 +222,26 @@ namespace Painto
 
         // Set Ownership
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr SetWindowLong(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern IntPtr SetWindowLong(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
+
+        [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLongPtr")]
+        private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
+
+        [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLong")]
+        private static extern IntPtr SetWindowLong32(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
+
+        private static IntPtr SetWindowLong(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong)
+        {
+            if (IntPtr.Size == 8) // Check if we're running in a 64-bit environment
+            {
+                return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+            }
+            else // 32-bit environment
+            {
+                return SetWindowLong32(hWnd, nIndex, dwNewLong);
+            }
+        }
 
         private enum WindowLongFlags
         {

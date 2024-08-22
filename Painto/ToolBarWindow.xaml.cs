@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Microsoft.UI.Xaml.Shapes;
+using Windows.UI.Input;
 using Painto.Modules;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,9 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using WinUIEx;
+using Windows.Devices.Input;
+using Windows.UI.Input.Inking;
+using Windows.UI.Core;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -69,6 +73,8 @@ namespace Painto
 
         internal static IntPtr hwnd;
 
+        IReadOnlyList<PointerDevice> _devices;
+        bool _isPenSupported;
 
         public ToolBarWindow()
         {
@@ -85,6 +91,9 @@ namespace Painto
             RemoveTitleBarAndBorder(hwnd);
             RemoveWindowShadow(hwnd);
             EnterFullScreenMode();
+
+            _devices =  PointerDevice.GetPointerDevices();
+            _isPenSupported = _devices.Any(pd => pd.PointerDeviceType == PointerDeviceType.Pen);
 
             LockScreen();
             //this.AppWindow.Move(new Windows.Graphics.PointInt32(0, 0));
