@@ -1,5 +1,5 @@
 # Welcome to Painto! 
-Just another on-screen notation software. <br><br>
+Just another on-screen notation software based on [WinUI 3](https://github.com/microsoft/microsoft-ui-xaml). <br><br>
 <a href="https://apps.microsoft.com/detail/9p7g2qf10wrb?mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
 </a>
