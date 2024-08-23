@@ -1,5 +1,5 @@
 # Welcome to Painto! 
-Just another draw on screen / on-screen anotation software. <br><br>
+Just another draw on screen / on-screen annotation software. <br><br>
 <a href="https://apps.microsoft.com/detail/9p7g2qf10wrb?mode=direct">
 	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
 </a>
