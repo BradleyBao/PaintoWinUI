@@ -123,6 +123,7 @@ namespace Painto
             var selectedItem = (GridViewItem)MajorFunctionControl.ContainerFromIndex(1);
             selectedItem?.Focus(FocusState.Programmatic);
             ToolBarWindow._computerMode = false;
+            ToolBarWindow._isEraserMode = false;
             ToolBarWindow.LockScreen();
         }
 

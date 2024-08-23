@@ -19,7 +19,7 @@
 
     <GridView x:Name="PenItemList" IsItemClickEnabled="True" ItemClick="PenItemList_ItemClick"
               ScrollViewer.VerticalScrollBarVisibility="Hidden" CanDragItems="True" CanReorderItems="True"
-              DoubleTapped="PenItemList_DoubleTapped" IsDoubleTapEnabled="True"
+              DoubleTapped="PenItemList_DoubleTapped" IsDoubleTapEnabled="True" AllowDrop="True"
               Padding="0 3 0 0" Margin="0" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Center" 
               Background="{ThemeResource ControlStrokeColorOnAccentDefault}"
     ItemTemplate="{StaticResource PenToolTemplate}" ItemsSource="{x:Bind ItemsSource}">
