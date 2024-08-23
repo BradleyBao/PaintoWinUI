@@ -47,6 +47,7 @@ namespace Painto
             {
                 ToolBarWindow.penColor = clickedItem.PenColor;
                 ToolBarWindow.penThickness = clickedItem.Thickness;
+                SwitchBackDrawControl?.Invoke(this, EventArgs.Empty);
             }
         }
 

@@ -165,7 +165,7 @@ namespace Painto
 
         private void ControlPanel_LayoutUpdated(object sender, object e)
         {
-            if (ControlPanel.ActualWidth > 0)
+            if (ControlPanel.ActualWidth > 0 && ControlPanel.ActualHeight > 0)
             {
                 AdaptWindowLocation();
             }
@@ -180,7 +180,8 @@ namespace Painto
 
             // 根据 DPI 更改窗口大小
             int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - 30, controlPanelWidth, 75));
+            int controlPanelHeight = (int)(ControlPanel.ActualHeight * dpiWindow / 96.0); 
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
         }
 
         public void AdaptWindowLocation(int height)
@@ -265,6 +266,8 @@ namespace Painto
             }
 
             penControl.ItemsSource = PenItems;
+            ToolBarWindow.penColor = PenItems[0].PenColor;
+            ToolBarWindow.penThickness = PenItems[0].Thickness;
             SavePenItems(PenItems);
         }
 
