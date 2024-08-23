@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Painto.Modules;
 using System;
 using System.Collections.Generic;
@@ -39,9 +40,9 @@ namespace Painto
             selectedItem?.Focus(FocusState.Programmatic);
         }
 
-        private void PenItemList_ItemClick(object sender, ItemClickEventArgs e)
+        private void PenItemList_ItemClick(object sender, TappedRoutedEventArgs e)
         {
-            var clickedItem = e.ClickedItem as PenData;
+            var clickedItem = (sender as GridView).SelectedItem as PenData;
 
             if (clickedItem != null)
             {
@@ -54,6 +55,9 @@ namespace Painto
         private void PenItemList_DoubleTapped(object sender, Microsoft.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
         {
             var item = (sender as GridView).SelectedItem as PenData;
+            DisableWindowControl?.Invoke(this, EventArgs.Empty);
+
+            // If double tapped before 
             if (penWindow != null)
             {
                 return;
@@ -61,7 +65,7 @@ namespace Painto
             penWindow = new CustomizePenWindow(item.Thickness, item.PenColor, item);
             penWindow.UpdatePenLayout += PenWindow_UpdatePenLayout;
             penWindow.SwitchBackToDrawingMode += PenWindow_SwitchBackToDrawingMode;
-            DisableWindowControl?.Invoke(this, EventArgs.Empty);
+            
             penWindow.Activate(); // Activate the window and ensure it gets focus
         }
 

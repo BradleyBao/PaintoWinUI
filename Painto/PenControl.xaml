@@ -17,9 +17,9 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <GridView x:Name="PenItemList" IsItemClickEnabled="True" ItemClick="PenItemList_ItemClick"
+    <GridView x:Name="PenItemList" IsItemClickEnabled="True"
               ScrollViewer.VerticalScrollBarVisibility="Hidden" CanDragItems="True" CanReorderItems="True"
-              DoubleTapped="PenItemList_DoubleTapped" IsDoubleTapEnabled="True" AllowDrop="True"
+              DoubleTapped="PenItemList_DoubleTapped" IsDoubleTapEnabled="True" AllowDrop="True" Tapped="PenItemList_ItemClick"
               Padding="0 3 0 0" Margin="0" ScrollViewer.VerticalScrollMode="Disabled" HorizontalAlignment="Center" 
               Background="{ThemeResource ControlStrokeColorOnAccentDefault}"
     ItemTemplate="{StaticResource PenToolTemplate}" ItemsSource="{x:Bind ItemsSource}">
