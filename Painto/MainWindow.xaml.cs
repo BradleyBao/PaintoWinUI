@@ -262,8 +262,8 @@ namespace Painto
                 PenItems = new ObservableCollection<PenData>
                 {
                     new PenData { PenColor = Colors.Black, Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Colors.Black.ToString()},
-                    new PenData { PenColor = Color.FromArgb(30,115,199,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(30,144,255,255).ToString()},
-                    new PenData { PenColor = Color.FromArgb(235,59,74,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(253,230,224,255).ToString()}
+                    new PenData { PenColor = Color.FromArgb(255,30,115,199), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(255,30,115,199).ToString()},
+                    new PenData { PenColor = Color.FromArgb(255,235,59,74), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(255,235,59,74).ToString()}
                 };
             }
 
@@ -335,6 +335,15 @@ namespace Painto
             SavePenItems(PenItems); 
         }
 
+        private void DeletePen()
+        {
+            var item = penControl.globalClickedItem;
+            PenItems.Remove(item);
+            penControl.ItemsSource = PenItems;
+            SavePenItems(PenItems);
+            
+        }
+
         // Win32 API 常量
         private const int SWP_NOMOVE = 0x0002;
         private const int SWP_NOSIZE = 0x0001;
@@ -402,6 +411,10 @@ namespace Painto
                 {
                     case "AddPen":
                         AddNewPen();
+                        break;
+
+                    case "RemovePen":
+                        DeletePen();
                         break;
 
                     case "CloseApp":

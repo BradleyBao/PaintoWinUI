@@ -18,6 +18,7 @@ namespace Painto
         public event MyEventHandler SwitchBackDrawControl;
         public event MyEventHandler SaveData;
         public int Index;
+        public PenData globalClickedItem;
 
         public ObservableCollection<PenData> ItemsSource
         {
@@ -39,12 +40,13 @@ namespace Painto
             PenItemList.SelectedIndex = 0;
             var selectedItem = (GridViewItem)PenItemList.ContainerFromIndex(0);
             selectedItem?.Focus(FocusState.Programmatic);
+            //this.globalClickedItem = ItemsSource[0];
         }
 
         private void PenItemList_ItemClick(object sender, TappedRoutedEventArgs e)
         {
             var clickedItem = (sender as GridView).SelectedItem as PenData;
-
+            globalClickedItem = clickedItem;
             if (clickedItem != null)
             {
                 ToolBarWindow.penColor = clickedItem.PenColor;
@@ -57,7 +59,7 @@ namespace Painto
         {
             var item = (sender as GridView).SelectedItem as PenData;
             DisableWindowControl?.Invoke(this, EventArgs.Empty);
-
+            globalClickedItem = item;
             // If double tapped before 
             if (penWindow != null)
             {
@@ -107,8 +109,6 @@ namespace Painto
             ItemsSource.RemoveAt(Index);
             PenItemList.ItemsSource = ItemsSource;
             SaveData?.Invoke(this, EventArgs.Empty);
-
-
         }
     }
 }
