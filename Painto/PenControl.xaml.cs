@@ -17,6 +17,7 @@ namespace Painto
         public event MyEventHandler DisableWindowControl;
         public event MyEventHandler SwitchBackDrawControl;
         public event MyEventHandler SaveData;
+        public int Index;
 
         public ObservableCollection<PenData> ItemsSource
         {
@@ -95,6 +96,19 @@ namespace Painto
                 }
                 
             }
+        }
+
+        private void PenItemList_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            // 获取点击的项目
+            var clickedItem = (e.OriginalSource as FrameworkElement)?.DataContext;
+            // 找到项目的索引
+            Index = PenItemList.Items.IndexOf(clickedItem);
+            ItemsSource.RemoveAt(Index);
+            PenItemList.ItemsSource = ItemsSource;
+            SaveData?.Invoke(this, EventArgs.Empty);
+
+
         }
     }
 }

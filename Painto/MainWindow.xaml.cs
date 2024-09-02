@@ -182,7 +182,8 @@ namespace Painto
             // 根据 DPI 更改窗口大小
             int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
             int controlPanelHeight = (int)(ControlPanel.ActualHeight * dpiWindow / 96.0); 
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
+            //this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight, controlPanelWidth, controlPanelHeight));
         }
 
         public void AdaptWindowLocation(int height)
@@ -261,8 +262,8 @@ namespace Painto
                 PenItems = new ObservableCollection<PenData>
                 {
                     new PenData { PenColor = Colors.Black, Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Colors.Black.ToString()},
-                    new PenData { PenColor = Color.FromArgb(30,144,255,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(30,144,255,255).ToString()},
-                    new PenData { PenColor = Color.FromArgb(253,230,224,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(253,230,224,255).ToString()}
+                    new PenData { PenColor = Color.FromArgb(30,115,199,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(30,144,255,255).ToString()},
+                    new PenData { PenColor = Color.FromArgb(235,59,74,255), Thickness = 5, penType = "Normal", Icon = "\uEE56", PenColorString = Color.FromArgb(253,230,224,255).ToString()}
                 };
             }
 
@@ -317,6 +318,21 @@ namespace Painto
 
             value = 1;
             DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, ref value, sizeof(int));
+        }
+
+        private void AddNewPen()
+        {
+            PenData new_penData = new PenData
+            {
+                PenColor = Colors.Black,
+                Thickness = 5,
+                penType = "Normal",
+                Icon = "\uEE56",
+                PenColorString = Colors.Black.ToString()
+            };
+            PenItems.Add(new_penData);
+            penControl.ItemsSource = PenItems;
+            SavePenItems(PenItems); 
         }
 
         // Win32 API 常量
@@ -385,6 +401,7 @@ namespace Painto
                 switch (clickedItem.Tag)
                 {
                     case "AddPen":
+                        AddNewPen();
                         break;
 
                     case "CloseApp":
