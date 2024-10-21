@@ -17,5 +17,5 @@ Just another draw on screen / on-screen annotation software. <br><br>
 ![Screenshot 2024-08-22 170027](https://github.com/user-attachments/assets/e78c68bd-0784-4df2-8cd1-bba457ad6381)
 
 # Todo 
-- [ ] Complete "Add" function. 
+- [x] Complete "Add" function. 
 - [ ] Complete "Clear All" function. 
