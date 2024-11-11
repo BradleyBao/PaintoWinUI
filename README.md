@@ -18,4 +18,4 @@ Just another draw on screen / on-screen annotation software. <br><br>
 
 # Todo 
 - [x] Complete "Add" function. 
-- [ ] Complete "Clear All" function. 
+- [x] Complete "Clear All" function. 
