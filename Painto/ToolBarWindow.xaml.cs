@@ -230,6 +230,11 @@ namespace Painto
             return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
         }
 
+        public void DeleteAllInk()
+        {
+            DrawingCanvas.Children.Clear();
+        }
+
 
 
         private void RemoveIntersectingLines(Point position)

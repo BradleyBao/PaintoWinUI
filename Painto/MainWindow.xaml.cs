@@ -344,6 +344,11 @@ namespace Painto
             
         }
 
+        private void DeleteAllInks()
+        {
+            _toolbarWindow.DeleteAllInk();
+        }
+
         // Win32 API 常量
         private const int SWP_NOMOVE = 0x0002;
         private const int SWP_NOSIZE = 0x0001;
@@ -419,6 +424,10 @@ namespace Painto
 
                     case "CloseApp":
                         APPShutDown();
+                        break;
+
+                    case "EraseAll":
+                        DeleteAllInks();
                         break;
 
                     default:
