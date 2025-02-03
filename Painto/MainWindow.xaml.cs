@@ -48,7 +48,7 @@ namespace Painto
 
         // Child Window - Setting
         private static Settings _settings;
-        private int monitorIndex = 0;
+        public int monitorIndex = 0;
 
         // Transparent + Click Through 
         private const int WS_EX_TRANSPARENT = 0x00000020;

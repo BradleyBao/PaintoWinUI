@@ -1,4 +1,4 @@
-using Microsoft.UI.Windowing;
+﻿using Microsoft.UI.Windowing;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -18,6 +18,7 @@ using Windows.Foundation.Collections;
 using Windows.UI;
 using Painto.Modules;
 using Windows.UI.WindowManagement;
+using Windows.Graphics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -102,14 +103,23 @@ namespace Painto
 
         public void AdaptWindowLocation()
         {
-
-            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
-            int screenHeight = displayArea.WorkArea.Height;
+            int indexMonitor = App.m_window.monitorIndex;
+            var displays = DisplayArea.FindAll();
+            DisplayArea display = displays[indexMonitor];
+            var displayArea = display.WorkArea;
+            int screenHeight = displayArea.Height;
+            int screenX = displayArea.X;
+            int screenY = displayArea.Y;
+            var newPos = new PointInt32(screenX, screenY);
+            // 移动窗口
+            //this.AppWindow.Move(newPos);
+            //IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            //var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            //var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+            //int screenHeight = displayArea.WorkArea.Height;
             int width = (int)(380 * dpiWindow / 96.0);
             int height = (int)(770 * dpiWindow / 96.0);
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight - height, width, height));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + screenX, screenHeight - height, width, height));
         }
 
         private void RemoveTitleBarAndBorder(IntPtr hwnd)
