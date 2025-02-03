@@ -23,6 +23,7 @@ using WinUIEx;
 using Windows.Devices.Input;
 using Windows.UI.Input.Inking;
 using Windows.UI.Core;
+using Windows.Graphics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -96,7 +97,21 @@ namespace Painto
             _isPenSupported = _devices.Any(pd => pd.PointerDeviceType == PointerDeviceType.Pen);
 
             LockScreen();
+
             //this.AppWindow.Move(new Windows.Graphics.PointInt32(0, 0));
+        }
+
+        public void MoveViaMonitor(int indexMonitor)
+        {
+            var displays = DisplayArea.FindAll();
+            DisplayArea display = displays[indexMonitor];
+            var displayArea = display.WorkArea;
+            int screenHeight = displayArea.Height;
+            int screenX = displayArea.X;
+            int screenY = displayArea.Y;
+            var newPos = new PointInt32(screenX, screenY);
+            // 移动窗口
+            this.AppWindow.Move(newPos);
         }
 
         private const int WS_EX_NOACTIVATE = 0x08000000;

@@ -53,6 +53,7 @@
                 <FontIcon Glyph="&#xE710;" Tag="AddPen" />
                 <FontIcon Glyph="&#xE738;" Tag="RemovePen" />
                 <FontIcon Glyph="&#xED62;" Tag="EraseAll" />
+                <FontIcon Glyph="&#xE713;" Tag="Settings" />
                 <FontIcon Glyph="&#xEF2C;" Foreground="#ff461f" Tag="CloseApp" />
 
                 <GridView.ItemContainerStyle>

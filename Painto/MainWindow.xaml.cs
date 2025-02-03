@@ -46,6 +46,10 @@ namespace Painto
         private int _currentWindowWidth;
         private uint dpiWindow;
 
+        // Child Window - Setting
+        private static Settings _settings;
+        private int monitorIndex = 0;
+
         // Transparent + Click Through 
         private const int WS_EX_TRANSPARENT = 0x00000020;
         private const int GWL_EXSTYLE = -20;
@@ -109,12 +113,33 @@ namespace Painto
             penControl.SaveData += PenControl_SaveData;
             penControl.SwitchBackDrawControl += PenControl_SwitchBackDrawControl;
             ControlPanel.LayoutUpdated += ControlPanel_LayoutUpdated;
-            
 
+            LoadSetting();
             InitWindow();
             SourceInitialized();
             InitPens();
+            LoadSetting();
             //AdaptWindowLocation();
+        }
+
+        private void LoadSetting()
+        {
+            // 获取应用程序的本地设置容器
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+
+            // 从设置属性中获取MonitorIndex
+            string MonitorIndex = localSettings.Values["Monitor"] as string;
+
+            // 如果 JSON 字符串存在，则反序列化为 ObservableCollection<PenData> 对象
+            if (!string.IsNullOrEmpty(MonitorIndex))
+            {
+                monitorIndex = int.Parse(MonitorIndex); 
+            }
+            else
+            {
+                monitorIndex = 0;
+                localSettings.Values["Monitor"] = "0";
+            }
         }
 
         private void PenControl_SwitchBackDrawControl(object sender, EventArgs e)
@@ -138,6 +163,7 @@ namespace Painto
 
         private void InitWindow()
         {
+            // Toolbar Window
             _toolbarWindow = new ToolBarWindow();
             IntPtr mainHwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             IntPtr toolbarHwnd = WinRT.Interop.WindowNative.GetWindowHandle(_toolbarWindow);
@@ -146,6 +172,10 @@ namespace Painto
             // 将 ToolBarWindow 设置为 MainWindow 的子窗体
             //SetOwner(toolbarHwnd, mainHwnd);
             _toolbarWindow.Activate();
+
+            // Setting Window
+            //_settings = new Settings();
+            _toolbarWindow.MoveViaMonitor(monitorIndex);
         }
 
         private void DisableToolBarControl(object sender, EventArgs e)
@@ -174,25 +204,63 @@ namespace Painto
 
         public void AdaptWindowLocation()
         {
-            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
-            int screenHeight = displayArea.WorkArea.Height;
+            //IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            //var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            //var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+            //int screenHeight = displayArea.WorkArea.Height;
+
+            var displays = DisplayArea.FindAll();
+            DisplayArea display = displays[monitorIndex];
+            var displayArea = display.WorkArea;
+            int screenHeight = displayArea.Height;
+            int screenX = displayArea.X;
+            int screenY = displayArea.Y;
 
             // 根据 DPI 更改窗口大小
             int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
             int controlPanelHeight = (int)(ControlPanel.ActualHeight * dpiWindow / 96.0); 
             //this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5, screenHeight, controlPanelWidth, controlPanelHeight));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + screenX, screenHeight, controlPanelWidth, controlPanelHeight));
+        }
+
+        public void MoveWindowFromMonitor(int indexMonitor)
+        {
+            var displays = DisplayArea.FindAll();
+            if (indexMonitor < displays.Count)
+            {
+                this.monitorIndex = indexMonitor;
+                DisplayArea display = displays[indexMonitor];
+                var displayArea = display.WorkArea;
+                int screenHeight = displayArea.Height;
+                int screenX = displayArea.X;
+
+                // 根据 DPI 更改窗口大小
+                int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
+                int controlPanelHeight = (int)(ControlPanel.ActualHeight * dpiWindow / 96.0);
+                //this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
+                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(screenX + 5, screenHeight, controlPanelWidth, controlPanelHeight));
+
+                _toolbarWindow.MoveViaMonitor(indexMonitor); 
+            }
+            
+
         }
 
         public void AdaptWindowLocation(int height)
         {
-            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
-            int screenHeight = displayArea.WorkArea.Height;
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight - height, 300 + PenItems.Count * 15, height));
+            var displays = DisplayArea.FindAll();
+            DisplayArea display = displays[monitorIndex];
+            var displayArea = display.WorkArea;
+            int screenHeight = displayArea.Height;
+            int screenX = displayArea.X;
+            int screenY = displayArea.Y;
+
+
+            //IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            //var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+            //var displayArea = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Primary);
+            //int screenHeight = displayArea.WorkArea.Height;
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count + screenX, screenHeight - height, 300 + PenItems.Count * 15, height));
         }
 
         private void SourceInitialized()
@@ -430,11 +498,45 @@ namespace Painto
                         DeleteAllInks();
                         break;
 
+                    case "Settings":
+                        OpenSetting();
+                        break;
+
                     default:
                         
                         break;
                 }
             }
+        }
+
+        private void OpenSetting()
+        {
+            // 强制切换至电脑模式
+            MajorFunctionControl.SelectedIndex = 0;
+            var selectedItem = (GridViewItem)MajorFunctionControl.ContainerFromIndex(0);
+            selectedItem?.Focus(FocusState.Programmatic);
+            ToolBarWindow._computerMode = true;
+            ToolBarWindow.UnlockScreen();
+
+            if (_settings != null)
+            {
+                // 窗口已存在，激活窗口
+                _settings.Activate();
+                return;
+            }
+            
+            // 创建新窗口实例
+            _settings = new Settings();
+            // 订阅窗口的 Closed 事件
+            _settings.Closed += Settings_Closed;
+            // 激活窗口
+            _settings.Activate();
+        }
+
+        private void Settings_Closed(object sender, WindowEventArgs args)
+        {
+            // 窗口关闭时，将引用置为空
+            _settings = null;
         }
 
         // ShutDown: Close first then shutdown
