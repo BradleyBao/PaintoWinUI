@@ -49,6 +49,7 @@ namespace Painto
         // Child Window - Setting
         private static Settings _settings;
         public int monitorIndex = 0;
+        public bool monitorFull = false;
 
         // Transparent + Click Through 
         private const int WS_EX_TRANSPARENT = 0x00000020;
@@ -79,6 +80,8 @@ namespace Painto
         public ObservableCollection<PenData> PenItems { get; set; }
 
         //public IntPtr hwnd;
+        public bool EnterInAnimation = false;
+        public bool ExitInAnimation = false;
 
         public MainWindow()
         {
@@ -142,6 +145,19 @@ namespace Painto
                 monitorIndex = 0;
                 localSettings.Values["Monitor"] = "0";
             }
+
+            // 设置FullMonitor
+            string IsMonitorFull = localSettings.Values["MonitorFull"] as string;
+            if (!string.IsNullOrEmpty(MonitorIndex))
+            {
+                monitorFull = Convert.ToBoolean(int.Parse(MonitorIndex));
+            }
+            else
+            {
+                monitorFull = false;
+                localSettings.Values["MonitorFull"] = "0";
+            }
+
         }
 
         private void PenControl_SwitchBackDrawControl(object sender, EventArgs e)
@@ -178,6 +194,10 @@ namespace Painto
             // Setting Window
             //_settings = new Settings();
             _toolbarWindow.MoveViaMonitor(monitorIndex);
+            if (this.monitorFull)
+            {
+                _toolbarWindow.SetFullscreenAcrossAllDisplays();
+            }
         }
 
         private void DisableToolBarControl(object sender, EventArgs e)
@@ -222,16 +242,18 @@ namespace Painto
             int screenHeight = displayArea.Height;
             int screenX = displayArea.X;
             int screenY = displayArea.Y;
+            int taskbarHeight = GetTaskbarHeight();
 
             // 根据 DPI 更改窗口大小
             int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
             int controlPanelHeight = (int)(ControlPanel.ActualHeight * dpiWindow / 96.0); 
             //this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
-            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + screenX, screenHeight, controlPanelWidth, controlPanelHeight));
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + screenX, screenHeight - taskbarHeight - 5, controlPanelWidth, controlPanelHeight));
         }
 
-        public void MoveWindowFromMonitor(int indexMonitor)
+        public void MoveWindowFromMonitor(int indexMonitor, bool isFullMonitor)
         {
+            this.monitorFull = isFullMonitor;
             var displays = DisplayArea.FindAll();
             if (indexMonitor < displays.Count)
             {
@@ -240,17 +262,21 @@ namespace Painto
                 var displayArea = display.WorkArea;
                 int screenHeight = displayArea.Height;
                 int screenX = displayArea.X;
+                int taskbarHeight = GetTaskbarHeight();
 
                 // 根据 DPI 更改窗口大小
                 int controlPanelWidth = (int)(ControlPanel.ActualWidth * dpiWindow / 96.0);
                 int controlPanelHeight = (int)(ControlPanel.ActualHeight * dpiWindow / 96.0);
                 //this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(5 + PenItems.Count, screenHeight, controlPanelWidth, controlPanelHeight));
-                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(screenX + 5, screenHeight, controlPanelWidth, controlPanelHeight));
-
-                _toolbarWindow.MoveViaMonitor(indexMonitor); 
+                this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(screenX + 5, screenHeight - taskbarHeight - 5, controlPanelWidth, controlPanelHeight));
+                if (this.monitorFull)
+                {
+                    _toolbarWindow.SetFullscreenAcrossAllDisplays();
+                } else
+                {
+                    _toolbarWindow.MoveViaMonitor(indexMonitor);
+                }
             }
-            
-
         }
 
         public void SetToolBarFullMonitor()
@@ -307,6 +333,43 @@ namespace Painto
 
         //[DllImport("user32.dll", SetLastError = true)]
         //private static extern IntPtr SetWindowLong(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
+        // P/Invoke declaration for FindWindow
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        // P/Invoke declaration for GetWindowRect
+        [DllImport("user32.dll")]
+        public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+        // Structure to hold the rectangle coordinates
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        // Find the taskbar and get its height
+        public static int GetTaskbarHeight()
+        {
+            // Find the taskbar window (ClassName "Shell_TrayWnd")
+            IntPtr taskbarHandle = FindWindow("Shell_TrayWnd", null);
+
+            // If taskbar is found, get its rectangle
+            if (taskbarHandle != IntPtr.Zero)
+            {
+                RECT rect;
+                if (GetWindowRect(taskbarHandle, out rect))
+                {
+                    // The height of the taskbar is the difference between Top and Bottom coordinates
+                    return rect.Bottom - rect.Top;
+                }
+            }
+
+            return 0; // If taskbar is not found, return 0
+        }
 
         [DllImport("user32.dll", SetLastError = true, EntryPoint = "SetWindowLongPtr")]
         private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, WindowLongFlags nIndex, IntPtr dwNewLong);
@@ -547,6 +610,39 @@ namespace Painto
             // 激活窗口
             _settings.Activate();
         }
+
+        private void MajorFunctionControl_PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            penControl.Visibility = Visibility.Visible;
+            SubFunctionControl.Visibility = Visibility.Visible;
+            ExpandCollapseAnimation.Begin();
+            this.EnterInAnimation = true;
+
+            ExpandCollapseAnimation.Completed += (s, args) =>
+            {
+                this.EnterInAnimation = false;
+            };
+        }
+
+        private void MajorFunctionControl_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            // 开始反向动画，注意这里没有立即隐藏控件
+            //ExpandCollapseAnimation.Seek(TimeSpan.Zero);  // 如果需要立即反向播放
+            CollapseCollapseAnimation.Begin();
+            this.ExitInAnimation = true;
+
+            // 使用 Storyboard 的 Completed 事件延迟改变 Visibility
+            CollapseCollapseAnimation.Completed += (s, args) =>
+            {
+                this.ExitInAnimation = false;
+                if (!EnterInAnimation) {
+                    // 动画完成后再改变 Visibility
+                    penControl.Visibility = Visibility.Collapsed;
+                    SubFunctionControl.Visibility = Visibility.Collapsed;
+                }
+            };
+        }
+
 
         private void Settings_Closed(object sender, WindowEventArgs args)
         {

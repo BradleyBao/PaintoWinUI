@@ -87,7 +87,7 @@
                 <controls:SettingsCard Description="Set the drawing area on every monitor."
                                        Header="Full Drawing Area"
                                        HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
-                    <ToggleSwitch x:Name="FullMonitorStatus" Toggled="FullMonitorStatus_Toggled" IsOn="False" />
+                    <ToggleSwitch x:Name="FullMonitorStatus" IsOn="False" />
                 </controls:SettingsCard>
 
 

@@ -121,9 +121,18 @@ namespace Painto
         private void SetMonitorBtn_Click(object sender, RoutedEventArgs e)
         {
             int selectedIndex = DisplayGridView.SelectedIndex;
-            App.m_window.MoveWindowFromMonitor(selectedIndex);
+            bool isFullMonitor = FullMonitorStatus.IsOn;
+            App.m_window.MoveWindowFromMonitor(selectedIndex, isFullMonitor);
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values["Monitor"] = selectedIndex.ToString();
+
+            if (isFullMonitor)
+            {
+                localSettings.Values["MonitorFull"] = "1";
+            } else
+            {
+                localSettings.Values["MonitorFull"] = "0";
+            }
 
             for (int i = 0; i < Displays.Count; i++)
             {
@@ -139,25 +148,26 @@ namespace Painto
 
             
         }
-
-        private void FullMonitorStatus_Toggled(object sender, RoutedEventArgs e)
-        {
-            var toggleSwitch = sender as ToggleSwitch;
-            if (toggleSwitch != null)
-            {
-                bool isOn = toggleSwitch.IsOn;  // 获取开关的状态
-                                                // 处理状态变化
-                if (isOn)
-                {
-                    // 开关被打开
-                    App.m_window.SetToolBarFullMonitor();
-                }
-                else
-                {
-                    // 开关被关闭
-                    Console.WriteLine("Toggle is OFF");
-                }
-            }
-        }
+        
+        // Test Method
+        //private void FullMonitorStatus_Toggled(object sender, RoutedEventArgs e)
+        //{
+        //    var toggleSwitch = sender as ToggleSwitch;
+        //    if (toggleSwitch != null)
+        //    {
+        //        bool isOn = toggleSwitch.IsOn;  // 获取开关的状态
+        //                                        // 处理状态变化
+        //        if (isOn)
+        //        {
+        //            // 开关被打开
+        //            App.m_window.SetToolBarFullMonitor();
+        //        }
+        //        else
+        //        {
+        //            // 开关被关闭
+        //            Console.WriteLine("Toggle is OFF");
+        //        }
+        //    }
+        //}
     }
 }

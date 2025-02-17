@@ -13,7 +13,9 @@
         <winex:TransparentTintBackdrop />
     </winex:WindowEx.SystemBackdrop>
 
-    <Grid>
+    <Grid x:Name="MainGUI"
+        PointerEntered="MajorFunctionControl_PointerEntered" 
+          PointerExited="MajorFunctionControl_PointerExited">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <!--<RowDefinition Height="50"/>-->
@@ -23,10 +25,16 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>-->
-        
+
         <StackPanel x:Name="ControlPanel" ScrollViewer.HorizontalScrollBarVisibility="Auto" CornerRadius="5" Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Height="50" Background="{ThemeResource CardStrokeColorDefaultSolid}" HorizontalAlignment="Center" VerticalAlignment="Bottom">
             <!--<Image Source="/Assets/sources/pen.svg" Height="100" />-->
-            <GridView x:Name="MajorFunctionControl" ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="2 0 0 0" ScrollViewer.VerticalScrollMode="Disabled" IsItemClickEnabled="True" ItemClick="RootTool_SelectItem">
+            <GridView x:Name="MajorFunctionControl" 
+                      ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                      Padding="0 3 0 0" 
+                      Margin="2 0 0 0" 
+                      ScrollViewer.VerticalScrollMode="Disabled" 
+                      IsItemClickEnabled="True" 
+                      ItemClick="RootTool_SelectItem">
                 <GridView.Items>
                     <GridViewItem>
                         <FontIcon Glyph="&#xE8B0;" Tag="ComputerMode" />
@@ -45,10 +53,19 @@
                 </GridView.ItemContainerStyle>
 
             </GridView>
-            
-            <local:PenControl x:Name="penControl"/>
 
-            <GridView x:Name="SubFunctionControl" ItemClick="SubFunctionControl_ItemClick" ScrollViewer.VerticalScrollBarVisibility="Hidden" Padding="0 3 0 0" Margin="0 0 2 0" ScrollViewer.VerticalScrollMode="Disabled" SelectionMode="None" IsItemClickEnabled="True" Background="{ThemeResource ControlStrokeColorOnAccentDefault}">
+            <local:PenControl x:Name="penControl" Visibility="Collapsed"/>
+
+            <GridView x:Name="SubFunctionControl" 
+                      ItemClick="SubFunctionControl_ItemClick" 
+                      ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                      Padding="0 3 0 0" 
+                      Margin="0 0 2 0" 
+                      ScrollViewer.VerticalScrollMode="Disabled" 
+                      SelectionMode="None" 
+                      IsItemClickEnabled="True" 
+                      Background="{ThemeResource ControlStrokeColorOnAccentDefault}"
+                      Visibility="Collapsed">
 
                 <FontIcon Glyph="&#xE710;" Tag="AddPen" />
                 <FontIcon Glyph="&#xE738;" Tag="RemovePen" />
@@ -64,7 +81,40 @@
 
             </GridView>
         </StackPanel>
+
+        <!-- Storyboard for animation -->
+        <Grid.Resources>
+            <Storyboard x:Name="ExpandCollapseAnimation">
+                <!--<DoubleAnimation x:Name="AnimationforMainGUI"
+            Storyboard.TargetName="MainGUI" 
+            Storyboard.TargetProperty="Width" 
+            From="200" To="400" Duration="0:0:0.5" AutoReverse="False"/>-->
+                <DoubleAnimation 
+            Storyboard.TargetName="penControl" 
+            Storyboard.TargetProperty="Opacity" 
+            From="0" To="1" Duration="0:0:0.5" AutoReverse="False"/>
+                <DoubleAnimation 
+            Storyboard.TargetName="SubFunctionControl" 
+            Storyboard.TargetProperty="Opacity" 
+            From="0" To="1" Duration="0:0:0.5" AutoReverse="False"/>
+            </Storyboard>
+
+            <Storyboard x:Name="CollapseCollapseAnimation">
+                <!--<DoubleAnimation 
+                Storyboard.TargetName="MajorFunctionControl" 
+                Storyboard.TargetProperty="Width" 
+                From="200" To="400" Duration="0:0:0.5" AutoReverse="True"/>-->
+                <DoubleAnimation 
+                Storyboard.TargetName="penControl" 
+                Storyboard.TargetProperty="Opacity"
+                From="1" To="0" Duration="0:0:0.5" AutoReverse="False"/>
+                <DoubleAnimation 
+                Storyboard.TargetName="SubFunctionControl" 
+                Storyboard.TargetProperty="Opacity" 
+                From="1" To="0" Duration="0:0:0.5" AutoReverse="False"/>
+            </Storyboard>
+        </Grid.Resources>
+
     </Grid>
     
-
 </winex:WindowEx>

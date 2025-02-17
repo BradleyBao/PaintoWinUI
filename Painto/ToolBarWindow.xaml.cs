@@ -107,11 +107,16 @@ namespace Painto
             DisplayArea display = displays[indexMonitor];
             var displayArea = display.WorkArea;
             int screenHeight = displayArea.Height;
+            int screenWidth = displayArea.Width;
             int screenX = displayArea.X;
             int screenY = displayArea.Y;
-            var newPos = new PointInt32(screenX, screenY);
-            // 移动窗口
-            this.AppWindow.Move(newPos);
+            // Old Method
+            //var newPos = new PointInt32(screenX, screenY);
+            //// 移动窗口
+            //this.AppWindow.Move(newPos);
+
+            // New Method
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(screenX, screenY, screenWidth, screenHeight));
             EnterFullScreenMode();
         }
 
