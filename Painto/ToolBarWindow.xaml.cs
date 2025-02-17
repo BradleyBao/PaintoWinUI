@@ -115,6 +115,43 @@ namespace Painto
             EnterFullScreenMode();
         }
 
+        public void SetFullscreenAcrossAllDisplays()
+        {
+            var displays = DisplayArea.FindAll();
+
+            int totalHeight = 0;
+            int totalWidth = 0;
+            int screenX = 0;
+            int screenY = 0;
+
+            for (int i = 0; i < displays.Count; i++)
+            {
+                var display = displays[i];
+                var displayArea = display.WorkArea;
+                totalWidth += displayArea.Width;
+                screenX = Math.Min(screenX, displayArea.X);
+                screenY = Math.Min(screenY, displayArea.Y);
+                totalHeight = Math.Max(totalHeight, displayArea.Height);
+            }
+            ExitFullScreenMode();
+            //EnterFullScreenMode();
+
+
+            hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            int extendedStyle = GetWindowLong(hwnd, GWL_STYLE);
+            WinUIEx.HwndExtensions.SetAlwaysOnTop(hwnd, true);
+            // ! IMPORTANT Click Through
+            _ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT);
+            //_ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
+            _ = SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle & ~WS_EX_TRANSPARENT);
+
+
+            this.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(screenX, screenY, totalWidth, totalHeight));
+            LockScreen();
+            UnlockScreen();
+            
+        }
+
         private const int WS_EX_NOACTIVATE = 0x08000000;
         private const int WS_EX_TOOLWINDOW = 0x00000080;
 
@@ -130,6 +167,13 @@ namespace Painto
             var m_appWindow = GetAppWindowForCurrentWindow();
             m_appWindow.SetPresenter(AppWindowPresenterKind.FullScreen);
         }
+
+        private void ExitFullScreenMode()
+        {
+            var m_appWindow = GetAppWindowForCurrentWindow();
+            m_appWindow.SetPresenter(AppWindowPresenterKind.Default);
+        }
+
 
         private void RemoveTitleBarAndBorder(IntPtr hwnd)
         {

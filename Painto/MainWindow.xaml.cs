@@ -78,6 +78,7 @@ namespace Painto
 
         public ObservableCollection<PenData> PenItems { get; set; }
 
+        //public IntPtr hwnd;
 
         public MainWindow()
         {
@@ -95,6 +96,7 @@ namespace Painto
 
             RemoveTitleBarAndBorder(hwnd);
             RemoveWindowShadow(hwnd);
+            //SetWindowTopMost(hwnd, true);
 
             //EnterFullScreenMode();
 
@@ -189,6 +191,11 @@ namespace Painto
             
         }
 
+        public static void SetWindowTopMost(IntPtr hwnd, bool topMost)
+        {
+            SetWindowPos(hwnd, topMost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+        }
+
         private void RequestRestoreWindow(object sender, EventArgs e)
         {
             AdaptWindowLocation();
@@ -244,6 +251,11 @@ namespace Painto
             }
             
 
+        }
+
+        public void SetToolBarFullMonitor()
+        {
+            _toolbarWindow.SetFullscreenAcrossAllDisplays();
         }
 
         public void AdaptWindowLocation(int height)
@@ -422,8 +434,11 @@ namespace Painto
         private const int SWP_NOSIZE = 0x0001;
         private const int SWP_NOACTIVATE = 0x0010;
         private const int SWP_NOREDRAW = 0x0080;
+        private const int SWP_NOZORDER = 0x0004;
 
         private static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
+        public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);

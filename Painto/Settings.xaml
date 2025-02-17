@@ -84,6 +84,13 @@
                     </GridView>
                 </controls:SettingsCard>
 
+                <controls:SettingsCard Description="Set the drawing area on every monitor."
+                                       Header="Full Drawing Area"
+                                       HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
+                    <ToggleSwitch x:Name="FullMonitorStatus" Toggled="FullMonitorStatus_Toggled" IsOn="False" />
+                </controls:SettingsCard>
+
+
                 <controls:SettingsCard Description="Set the monitor that Painto display."
                                Header="Set the monitor"
                                HeaderIcon="{ui:FontIcon Glyph=&#xE7FA;}"
