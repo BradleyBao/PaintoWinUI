@@ -63,8 +63,11 @@ namespace Painto
 
         public void Init()
         {
-            // Setting 1: Get All Monitors 
+            // Setting 1: Monitor Related: Get All Monitors and Full Monitor
             GetAllDisplays();
+
+            // Setting 2: UI related 
+            SetupUI();
         }
 
         public void GetAllDisplays()
@@ -77,6 +80,10 @@ namespace Painto
             // 从设置属性中获取MonitorIndex
             string MonitorIndex = localSettings.Values["Monitor"] as string;
             int monitorIndex = int.Parse(MonitorIndex);
+
+            string MonitorFull = localSettings.Values["MonitorFull"] as string;
+            int monitorFull = int.Parse(MonitorFull);
+            bool _monitorFull = monitorFull != 0;
 
             for (int i = 0; i < displays.Count; i++) 
             {
@@ -109,6 +116,23 @@ namespace Painto
             }
             
             DisplayGridView.SelectedIndex = monitorIndex;
+
+            if (_monitorFull)
+            {
+                FullMonitorStatus.IsOn = true;
+            }
+        }
+
+        public void SetupUI()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            string toolbarCollapse = localSettings.Values["IsToolBarCollapse"] as string;
+            int istoolbarCollapse = int.Parse(toolbarCollapse);
+            bool istoolbarCollapsed = istoolbarCollapse != 0;
+            if (istoolbarCollapsed)
+            {
+                ToolBarCollapsed.IsOn = true;
+            }
         }
 
         public DisplayArea GetCurrentWindowDisplay(Window window)
@@ -148,7 +172,29 @@ namespace Painto
 
             
         }
-        
+
+        private void ToolBarCollapsed_Toggled(object sender, RoutedEventArgs e)
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            var toggleSwitch = sender as ToggleSwitch;
+            if (toggleSwitch != null)
+            {
+                bool isOn = toggleSwitch.IsOn;
+                if (isOn)
+                {
+                    App.m_window.IsToolBarCollapse = true;
+                    localSettings.Values["IsToolBarCollapse"] = "1";
+                    
+                } else
+                {
+                    App.m_window.IsToolBarCollapse = false;
+                    localSettings.Values["IsToolBarCollapse"] = "0";
+                }
+
+                App.m_window.SetCollapsed(isOn);
+            }
+        }
+
         // Test Method
         //private void FullMonitorStatus_Toggled(object sender, RoutedEventArgs e)
         //{

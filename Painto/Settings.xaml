@@ -103,8 +103,17 @@
                     Style="{StaticResource DefaultButtonStyle}" />
                 </controls:SettingsCard>
 
+                <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}"
+               x:Name="ToolbarUIHeader"
+               x:Uid="ToolbarUIHeaderUid"
+               Text="ToolBar UI" />
 
-
+                <controls:SettingsCard Description="Set the toolbar window whether it would automatically collapsed if not focused."
+                       Header="ToolBar Collapsed"
+                       HeaderIcon="{ui:FontIcon Glyph=&#xE740;}">
+                    <ToggleSwitch x:Name="ToolBarCollapsed" Toggled="ToolBarCollapsed_Toggled" IsOn="False" />
+                </controls:SettingsCard>
+                
             </StackPanel>
         </ScrollViewer>
 

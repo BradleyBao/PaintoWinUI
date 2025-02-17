@@ -82,6 +82,7 @@ namespace Painto
         //public IntPtr hwnd;
         public bool EnterInAnimation = false;
         public bool ExitInAnimation = false;
+        public bool IsToolBarCollapse = false;
 
         public MainWindow()
         {
@@ -123,7 +124,7 @@ namespace Painto
             InitWindow();
             SourceInitialized();
             InitPens();
-            LoadSetting();
+            //LoadSetting();
             //AdaptWindowLocation();
         }
 
@@ -148,14 +149,25 @@ namespace Painto
 
             // 设置FullMonitor
             string IsMonitorFull = localSettings.Values["MonitorFull"] as string;
-            if (!string.IsNullOrEmpty(MonitorIndex))
+            if (!string.IsNullOrEmpty(IsMonitorFull))
             {
-                monitorFull = Convert.ToBoolean(int.Parse(MonitorIndex));
+                monitorFull = Convert.ToBoolean(int.Parse(IsMonitorFull));
             }
             else
             {
                 monitorFull = false;
                 localSettings.Values["MonitorFull"] = "0";
+            }
+
+            // 设置ToolBar是否自动Collapse
+            string isToolBarCollapsed = localSettings.Values["IsToolBarCollapse"] as string;
+            if (!string.IsNullOrEmpty(isToolBarCollapsed))
+            {
+                IsToolBarCollapse = Convert.ToBoolean(int.Parse(isToolBarCollapsed));
+            } else
+            {
+                IsToolBarCollapse = false;
+                localSettings.Values["IsToolBarCollapse"] = "0";
             }
 
         }
@@ -197,6 +209,24 @@ namespace Painto
             if (this.monitorFull)
             {
                 _toolbarWindow.SetFullscreenAcrossAllDisplays();
+            }
+
+            SetCollapsed(this.IsToolBarCollapse);
+        }
+
+        public void SetCollapsed(bool status)
+        {
+            if (status)
+            {
+                penControl.Visibility = Visibility.Collapsed;
+                SubFunctionControl.Visibility = Visibility.Collapsed;
+                
+            } else
+            {
+                penControl.Visibility = Visibility.Visible;
+                SubFunctionControl.Visibility = Visibility.Visible;
+                penControl.Opacity = 1;
+                SubFunctionControl.Opacity = 1;
             }
         }
 
@@ -613,6 +643,8 @@ namespace Painto
 
         private void MajorFunctionControl_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
+            if (!IsToolBarCollapse) { return; }
+
             penControl.Visibility = Visibility.Visible;
             SubFunctionControl.Visibility = Visibility.Visible;
             ExpandCollapseAnimation.Begin();
@@ -626,6 +658,7 @@ namespace Painto
 
         private void MajorFunctionControl_PointerExited(object sender, PointerRoutedEventArgs e)
         {
+            if (!IsToolBarCollapse) { return; }
             // 开始反向动画，注意这里没有立即隐藏控件
             //ExpandCollapseAnimation.Seek(TimeSpan.Zero);  // 如果需要立即反向播放
             CollapseCollapseAnimation.Begin();
