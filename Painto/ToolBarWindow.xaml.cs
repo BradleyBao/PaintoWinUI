@@ -112,6 +112,7 @@ namespace Painto
             var newPos = new PointInt32(screenX, screenY);
             // 移动窗口
             this.AppWindow.Move(newPos);
+            EnterFullScreenMode();
         }
 
         private const int WS_EX_NOACTIVATE = 0x08000000;
